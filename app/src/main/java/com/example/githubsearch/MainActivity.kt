@@ -57,16 +57,20 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun searchSomething(query: String, pageNumber: Int){
+    fun searchSomething(query: String, pageNumber: Int) {
         RetrofitClient.getInstance().api.searchUser(query, pageNumber, 100)
             .enqueue(object : Callback<SearchResult> {
                 override fun onResponse(
                     call: Call<SearchResult>,
                     response: Response<SearchResult>
                 ) {
-
-                    if(response.message() == "OK"){
-                        if(pageNumber == 1){
+                    if (response.message() == "OK") {
+                        if (pageNumber == 1) {
+                            Toast.makeText(
+                                applicationContext,
+                                "The system found " + response.body()?.totalCount + " users named " + query,
+                                Toast.LENGTH_LONG
+                            ).show()
                             lastPage = response.body()?.totalCount ?: 1
                             listSearchItem = response.body()?.items ?: mutableListOf()
                             searchAdapter.submitList(response.body()?.items)
@@ -79,23 +83,23 @@ class MainActivity : AppCompatActivity() {
                                 }
                                 adapter?.notifyDataSetChanged()
                             }
-                        }else{
+                        } else {
                             listSearchItem.addAll(response.body()?.items ?: mutableListOf())
                             rvSearchResult.adapter?.notifyDataSetChanged()
                         }
-                    }else if(response.message() == "Unprocessable Entity"){
+                    } else if (response.message() == "Unprocessable Entity") {
                         Toast.makeText(
                             applicationContext,
                             "Only the first 1000 search results are available",
                             Toast.LENGTH_LONG
                         ).show()
-                    }else if(response.message() == "rate limit exceeded"){
+                    } else if (response.message() == "rate limit exceeded") {
                         Toast.makeText(
                             applicationContext,
                             "You can only access 10 times per minute",
                             Toast.LENGTH_LONG
                         ).show()
-                    }else{
+                    } else {
                         Toast.makeText(
                             applicationContext,
                             response.message(),
